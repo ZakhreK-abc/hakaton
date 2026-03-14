@@ -2,9 +2,9 @@ from pydantic import BaseModel
 
 class SubscribeBase(BaseModel):
     name: str
-    prise: float
-    kategory: str
-    raeting: float
+    priсe: float
+    category: str
+    rating: float
     description: str
     
 class Subscribe(SubscribeBase):
