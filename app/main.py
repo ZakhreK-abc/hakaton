@@ -1,22 +1,26 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.routers import base
 from app.database import engine, Base
-import asyncio
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)  # только для dev
+    yield
+    await engine.dispose()
+
 
 app = FastAPI(
     title="Магазин API",
-    version="1.0"
-    )
+    version="1.0",
+    lifespan=lifespan,
+)
 
 app.include_router(base.router, prefix="/api")
 
+
 @app.get("/")
 def home():
-    return {"messege": "home"}
-
-# Создаём таблицы при старте (только для разработки!)
-@app.on_event("startup")
-async def startup_event():
-    async with engine.begin() as conn:
-        # await conn.run_sync(Base.metadata.drop_all)   # если нужно чистить
-        await conn.run_sync(Base.metadata.create_all)
+    return {"message": "home"}   # исправил опечатку "messege"
