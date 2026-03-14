@@ -17,9 +17,9 @@ class Subscribes(Base):                    # ← Singular форма обычн�
     price: Mapped[float] = mapped_column(
         Float, nullable=False
     )
-    category: Mapped[str] = mapped_column(   # ← category, а не kategory
-        String(100), nullable=False, index=True
-    )
     rating: Mapped[float] = mapped_column(
         Float, nullable=False, default=0.0   # ← default очень помогает
+    )
+    category: Mapped[str] = mapped_column(   # ← category, а не kategory
+        String(100), nullable=False, index=True
     )
