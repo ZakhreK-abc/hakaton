@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.model import Subscribes
+from app.models.subscribes import Subscribes
 from app.database import get_db
-from app.schemas.subscribes import SubscribeCreate, Subscribe
+from app.schemas.subscribe import SubscribeCreate, SubscribeUpdate, Subscribe
 
 router = APIRouter(prefix="/subscribe", tags=["subscribe"])
 
@@ -12,6 +12,14 @@ router = APIRouter(prefix="/subscribe", tags=["subscribe"])
 async def get_subscribes(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Subscribes))
     return result.scalars().all()
+
+@router.get("/{Subscribe_id}", response_model=Subscribe)
+async def get_item(subscribe_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Subscribes).where(Subscribes.id == subscribe_id))
+    db_item = result.scalar_one_or_none()
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Подписка не найдена")
+    return db_item
 
 @router.post("/", response_model=Subscribe, status_code=201)
 async def create_subscribe(
@@ -24,9 +32,36 @@ async def create_subscribe(
     await db.refresh(db_item)  # теперь можно безопасно обновить объект
     return db_item
 
-# @router.post("/", response_model=Subscribe, status_code=201)
-# async def create_subscribe(item: SubscribeCreate, db: AsyncSession = Depends(get_db)):
-#     db_item = Subscribes(**item.model_dump())
-#     db.add(db_item)
-#     await db.refresh(db_item)
-#     return db_item
+
+@router.put("/{subscribe_id}", response_model=Subscribe)
+async def update_subscribe(
+    subscribe_id: int,
+    subscribe_update: SubscribeUpdate,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(Subscribes).where(Subscribes.id == subscribe_id))
+    db_item = result.scalar_one_or_none()
+
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Подписка не найдена")
+    
+    update_data = subscribe_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_item, key, value)
+
+    await db.commit()
+    await db.refresh(db_item)
+    return db_item
+
+
+@router.delete("/{subscribe_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_item(subscribe_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Subscribes).where(Subscribes.id == subscribe_id))
+    db_item = result.scalar_one_or_none()
+
+    if db_item is None:
+        raise HTTPException(status_code=404, detail="Товар не найден")
+
+    await db.delete(db_item)
+    await db.commit()
+    return None   # 204 No Content не возвращает тело

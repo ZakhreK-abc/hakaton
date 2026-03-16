@@ -13,6 +13,8 @@ class SubscribeBase(BaseModel):
 class SubscribeCreate(SubscribeBase):
     pass
 
+class SubscribeUpdate(SubscribeBase):
+    pass
 
 class Subscribe(SubscribeBase):
     id: int
