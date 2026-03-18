@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.schemas.subscribe import SubscribeCreate, SubscribeUpdate, Subscribe
 from app.models.subscribes import Subscribes
 from app.database import get_db
-from app.schemas.subscribe import SubscribeCreate, SubscribeUpdate, Subscribe
+
 
 router = APIRouter(prefix="/subscribe", tags=["subscribe"])
 

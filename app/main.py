@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.routers import base
+from app.routers import subscribe
 from app.database import engine, Base
 
 
@@ -18,7 +18,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(base.router, prefix="/api")
+app.include_router(subscribe.router, prefix="/api")
 
 
 @app.get("/")
