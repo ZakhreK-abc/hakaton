@@ -61,7 +61,7 @@ async def delete_item(subscribe_id: int, db: AsyncSession = Depends(get_db)):
     db_item = result.scalar_one_or_none()
 
     if db_item is None:
-        raise HTTPException(status_code=404, detail="Товар не найден")
+        raise HTTPException(status_code=404, detail="Подписка не найдена")
 
     await db.delete(db_item)
     await db.commit()
