@@ -7,15 +7,9 @@ from sqlalchemy.ext.asyncio import (
 from sqlalchemy.orm import DeclarativeBase
 import os
 from typing import AsyncGenerator
+from app.core.config import settings
 
-
-# DATABASE_URL = os.getenv(
-#     "DATABASE_URL",
-#     "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
-#     # для тестов: "sqlite+aiosqlite:///./test.db"
-# )
-
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
+DATABASE_URL = settings.DATABASE_URL
 
 engine: AsyncEngine = create_async_engine(
     DATABASE_URL,

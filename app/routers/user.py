@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.user import UserCreate, UserUpdate, UserLogin, User
+from app.schemas.user import UserCreate, UserUpdate, UserLogin, UserOut
 from app.models.users import Users
 from app.database import get_db
+from app.core.encryption import encryptor
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -13,7 +14,7 @@ async def login(
     creds: UserLogin,
     db: AsyncSession = Depends(get_db)
 ):
-    # Ищем пользователя по почте
+    # 1. Ищем пользователя по почте
     result = await db.execute(
         select(Users).where(Users.mail == creds.mail)
     )
@@ -25,15 +26,29 @@ async def login(
             detail="Неверный email или пароль"
         )
 
-    # Здесь должна быть проверка пароля (bcrypt, argon2 и т.д.)
-    # Сейчас просто заглушка — в реальности так НЕЛЬЗЯ!
-    if user.password != creds.password:  # ← опасно! хранить пароли в plaintext нельзя
+    # 2. Расшифровываем пароль, который лежит в базе
+    try:
+        decrypted_stored_password = encryptor.decrypt(user.password)
+    except Exception as e:
+        # Если расшифровка не удалась → скорее всего ключ неверный или данные повреждены
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка обработки учётных данных"
+        )
+
+    # 3. Сравниваем расшифрованный пароль из базы с тем, что прислал пользователь
+    if decrypted_stored_password != creds.password:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный email или пароль"
         )
 
-    return {"verify": True, "user_id": user.id, "nickname": user.nickname}
+    # 4. Успешный вход
+    return {
+        "verify": True,
+        "user_id": user.id,
+        "nickname": user.nickname
+    }
 
 # @router.get("/", response_model=User)
 # async def get_user(user: Annotated[dict, Depends(get_user)], db: AsyncSession = Depends(get_db)):
@@ -48,7 +63,7 @@ async def login(
 #     elif mail == mail_item and password == password_item:
 #         return {"verefy": True}
 
-@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 async def create_user(new_user: UserCreate, db: AsyncSession = Depends(get_db)):
     # 1. Проверка уникальности почты
     result = await db.execute(select(Users).where(Users.mail == new_user.mail))
@@ -58,14 +73,14 @@ async def create_user(new_user: UserCreate, db: AsyncSession = Depends(get_db)):
             detail="Учётная запись с таким адресом почты уже существует"
         )
 
-    # 2. Очень простая проверка формата почты (лучше использовать pydantic валидатор)
+    # 2. Проверка формата почты
     if "@" not in new_user.mail or "." not in new_user.mail.split("@")[-1]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Некорректный адрес электронной почты"
         )
 
-    # 3. Создание пользователя
+    # password уже зашифрован в new_user.model_dump() благодаря @field_serializer
     db_item = Users(**new_user.model_dump())
     db.add(db_item)
     await db.commit()
