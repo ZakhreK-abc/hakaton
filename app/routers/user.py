@@ -2,12 +2,41 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.user import UserCreate, UserUpdate, UserLogin, UserOut
+from app.schemas.user import UserCreate, UserUpdate, UserLogin, UserOut, User
 from app.models.users import Users
 from app.database import get_db
 from app.core.encryption import encryptor
 
 router = APIRouter(prefix="/user", tags=["user"])
+
+@router.get("/", response_model=list[User])
+async def get_all_users(db: AsyncSession = Depends(get_db)):
+    stmt = select(Users).order_by(Users.id)
+    result = await db.execute(stmt)
+    users = result.scalars().all()
+    
+    if not users:
+        raise HTTPException(404, "Пользователи не найдены")
+    
+    return users
+
+@router.get("/{user_id}", response_model=User)
+async def get_user_by_id(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(
+        select(Users).where(Users.id == user_id)
+    )
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден"
+        )
+
+    return user
 
 @router.post("/login", response_model=dict)
 async def login(

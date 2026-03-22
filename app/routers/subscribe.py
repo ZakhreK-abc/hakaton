@@ -10,12 +10,12 @@ router = APIRouter(prefix="/subscribe", tags=["subscribe"])
 
 
 @router.get("/", response_model=list[Subscribe])          # ← исправил
-async def get_subscribes(db: AsyncSession = Depends(get_db)):
+async def get_all_subscribes(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Subscribes))
     return result.scalars().all()
 
 @router.get("/{Subscribe_id}", response_model=Subscribe)
-async def get_item(subscribe_id: int, db: AsyncSession = Depends(get_db)):
+async def get_subscribe(subscribe_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Subscribes).where(Subscribes.id == subscribe_id))
     db_item = result.scalar_one_or_none()
     if db_item is None:
@@ -56,7 +56,7 @@ async def update_subscribe(
 
 
 @router.delete("/{subscribe_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_item(subscribe_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_subscribe(subscribe_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Subscribes).where(Subscribes.id == subscribe_id))
     db_item = result.scalar_one_or_none()
 

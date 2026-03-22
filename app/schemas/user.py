@@ -28,3 +28,6 @@ class UserOut(UserBase):  # для ответа
             except Exception:
                 return "[невозможно расшифровать]"
         return None
+
+class User(UserBase):
+    id: int
