@@ -15,6 +15,6 @@ class Users(Base):
         String(100), nullable=False, index=True
     )
     password: Mapped[str] = mapped_column(
-        String(100), nullable=False, index=True
+        String(100000), nullable=False, index=True
     )
     

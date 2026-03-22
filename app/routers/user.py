@@ -26,7 +26,7 @@ async def login(
             detail="Неверный email или пароль"
         )
 
-    # 2. Расшифровываем пароль, который лежит в базе
+    # 2. Расшифровываем пароль, которыALTER TABLE имя_таблицы DROP COLUMN имя_столбца;й лежит в базе
     try:
         decrypted_stored_password = encryptor.decrypt(user.password)
     except Exception as e:
@@ -68,20 +68,20 @@ async def create_user(new_user: UserCreate, db: AsyncSession = Depends(get_db)):
     # 1. Проверка уникальности почты
     result = await db.execute(select(Users).where(Users.mail == new_user.mail))
     if result.scalar_one_or_none() is not None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Учётная запись с таким адресом почты уже существует"
-        )
+        raise HTTPException(400, "Учётная запись с таким адресом почты уже существует")
 
-    # 2. Проверка формата почты
-    if "@" not in new_user.mail or "." not in new_user.mail.split("@")[-1]:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Некорректный адрес электронной почты"
-        )
+    # 2. Шифруем пароль ПЕРЕД сохранением
+    encrypted_password = encryptor.encrypt(new_user.password)
 
-    # password уже зашифрован в new_user.model_dump() благодаря @field_serializer
-    db_item = Users(**new_user.model_dump())
+    # 3. Создаём объект с уже зашифрованным паролем
+    db_item = Users(
+        nickname=new_user.nickname,
+        mail=new_user.mail,
+        password=encrypted_password,          # ← здесь зашифрованный!
+        # phone=new_user.phone,             # если тоже шифруешь — аналогично
+        # другие поля...
+    )
+
     db.add(db_item)
     await db.commit()
     await db.refresh(db_item)
