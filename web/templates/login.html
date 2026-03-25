@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="login-container">
+    <h2>Вход в SubSpace</h2>
+    
+    <form method="POST">
+        <div class="input-group">
+            <label>Почта</label>
+            <input type="email" name="mail" placeholder="your@email.com" required>
+        </div>
+        
+        <div class="input-group">
+            <label>Пароль</label>
+            <input type="password" name="password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">
+            Войти
+        </button>
+    </form>
+
+    <!-- Вот это нужно добавить / исправить -->
+    <div class="auth-footer">
+        <p>Нет аккаунта? 
+            <a href="{{ url_for('register') }}">Зарегистрироваться</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

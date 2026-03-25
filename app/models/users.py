@@ -1,5 +1,5 @@
 from sqlalchemy import String, Integer
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 
 class Users(Base):
@@ -18,3 +18,11 @@ class Users(Base):
         String(100000), nullable=False, index=True
     )
     
+    transactions: Mapped[list["Transaction"]] = relationship(
+        "Transaction", 
+        back_populates="user", 
+        cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<User {self.nickname}>"

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<div class="dashboard">
+    <h1 class="welcome">Добро пожаловать, {{ nickname }}!</h1>
+    
+    <div class="section">
+        <p class="section-title">Популярные подписки этой недели</p>
+        
+        <div class="popular-grid">
+            <div class="sub-card" onclick="buySubscription(1)">
+                <div class="card-image">
+                    <img src="{{ url_for('static', filename='images/sbcinema.png') }}" alt="SBcinema">
+                </div>
+                <div class="card-info">
+                    <h3>SBcinema</h3>
+                    <p class="price">399 ₽ / мес</p>
+                    <span class="tag">Кино</span>
+                </div>
+            </div>
+
+            <div class="sub-card" onclick="buySubscription(2)">
+                <div class="card-image">
+                    <img src="{{ url_for('static', filename='images/sbmusic.png') }}" alt="SBmusic">
+                </div>
+                <div class="card-info">
+                    <h3>SBmusic</h3>
+                    <p class="price">249 ₽ / мес</p>
+                    <span class="tag">Музыка</span>
+                </div>
+            </div>
+
+            <div class="sub-card" onclick="buySubscription(3)">
+                <div class="card-image">
+                    <img src="{{ url_for('static', filename='images/sbmarketplace.png') }}" alt="SBmarketplace">
+                </div>
+                <div class="card-info">
+                    <h3>SBmarketplace</h3>
+                    <p class="price">199 ₽ / мес</p>
+                    <span class="tag">Маркетплейс</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h2>Быстрые действия</h2>
+        <button onclick="generateRandomTransaction()" class="action-btn big-btn">
+            Создать случайную тестовую транзакцию
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+<script>
+function buySubscription(subscribeId) {
+    if (!confirm(`Оформить подписку №${subscribeId}?`)) return;
+
+    fetch(`/dev/generate-fake-transaction?user_id=1&subscribe_id=${subscribeId}`, {
+        method: 'POST'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Ошибка сервера');
+        return response.json();
+    })
+    .then(data => {
+        alert(`✅ Подписка оформлена!\nТранзакция №${data.transaction_id}\n${data.service_name} — ${data.amount} ₽`);
+        // Можно добавить обновление списка подписок позже
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Ошибка при создании транзакции. Проверь, запущен ли FastAPI сервер.");
+    });
+}
+
+function generateRandomTransaction() {
+    fetch('/dev/generate-fake-transaction?user_id=1&subscribe_id=1', {
+        method: 'POST'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Ошибка сервера');
+        return response.json();
+    })
+    .then(data => {
+        alert(`✅ Случайная транзакция создана!\nТранзакция №${data.transaction_id}\n${data.service_name} — ${data.amount} ₽`);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("❌ Не удалось создать транзакцию.\nУбедись, что FastAPI запущен на порту 8000.");
+    });
+}
+</script>

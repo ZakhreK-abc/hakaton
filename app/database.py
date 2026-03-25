@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine
 )
 from sqlalchemy.orm import DeclarativeBase
-import os
 from typing import AsyncGenerator
 from app.core.config import settings
 

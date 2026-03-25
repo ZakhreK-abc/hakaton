@@ -6,3 +6,5 @@ pydantic-settings
 alembic
 python-dotenv
 cryptography
+flask
+yookassa

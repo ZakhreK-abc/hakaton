@@ -1,0 +1,49 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubSpace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-container">
+            <span class="logo">SubSpace</span>
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="header-logo">
+        </div>
+        <div class="burger" onclick="toggleMenu()">☰</div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span class="logo">SubSpace</span>
+            <span class="close-btn" onclick="toggleMenu()">✕</span>
+        </div>
+        <a href="{{ url_for('dashboard') }}">Главная</a>
+        <a href="{{ url_for('analytics') }}">Аналитика</a>
+        <a href="{{ url_for('my_subscriptions') }}">Мои подписки</a>
+        <a href="{{ url_for('settings') }}">Настройки</a>
+        <a href="#" onclick="logout()">Выйти</a>
+    </div>
+
+    <div class="main-content">
+        {% block main_content %}{% endblock %}
+    </div>
+
+    <script>
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    function logout() {
+        if (confirm('Выйти из аккаунта?')) {
+            window.location.href = '/logout'; // добавь маршрут если нужно
+        }
+    }
+    </script>
+</body>
+</html>
