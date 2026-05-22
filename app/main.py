@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.routers import subscribe, user
+from app.routers import subscribe, user, bank
 from app.database import engine, Base
 
 
@@ -20,6 +20,7 @@ app = FastAPI(
 
 app.include_router(subscribe.router, prefix="/api")
 app.include_router(user.router, prefix="/api")
+app.include_router(bank.router, prefix="/api")
 
 
 

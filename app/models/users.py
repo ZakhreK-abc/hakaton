@@ -26,3 +26,4 @@ class Users(Base):
 
     def __repr__(self):
         return f"<User {self.nickname}>"
+    
