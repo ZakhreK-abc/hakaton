@@ -45,7 +45,7 @@ async def login(
 ):
     # 1. Ищем пользователя по почте
     result = await db.execute(
-        select(Users).where(Users.mail == creds.mail)
+        select(Users).where(Users.email == creds.mail)
     )
     user = result.scalar_one_or_none()
 
@@ -105,7 +105,7 @@ async def create_user(new_user: UserCreate, db: AsyncSession = Depends(get_db)):
     # 3. Создаём объект с уже зашифрованным паролем
     db_item = Users(
         nickname=new_user.nickname,
-        mail=new_user.mail,
+        mail=new_user.email,
         password=encrypted_password,          # ← здесь зашифрованный!
         # phone=new_user.phone,             # если тоже шифруешь — аналогично
         # другие поля...

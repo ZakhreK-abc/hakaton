@@ -9,16 +9,19 @@ class Transaction(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    
+
     amount: Mapped[float] = mapped_column(Numeric(15, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), default="RUB")
-    type: Mapped[str] = mapped_column(String(30), nullable=False)          # ← вот эта колонка
+    type: Mapped[str] = mapped_column(String(30), nullable=False)          # payment, transfer, deposit, withdrawal, subscription
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
     recipient: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="completed")
+    card_number: Mapped[str | None] = mapped_column(String(20), nullable=True)   # Номер карты
+
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
+    # Связь
     user: Mapped["Users"] = relationship("Users", back_populates="transactions")
 
     def __repr__(self):
-        return f"<Transaction {self.id} | {self.amount} {self.type}>"
+        return f"<Transaction {self.id} | {self.amount} RUB | {self.type}>"
